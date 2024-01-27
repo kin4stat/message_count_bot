@@ -67,7 +67,7 @@ def echo_all(message):
         start_week = (first_day - datetime.timedelta(days=7)).strftime("%d.%m.%Y")
         end_week = (first_day - datetime.timedelta(days=1)).strftime("%d.%m.%Y")
         result = f"Клавишные легенды вечности\n"
-        data = requests.get(f"http://localhost:25424/global_stats/{chat_id}").json()
+        data = requests.get(f"http://typing_count:25424/global_stats/{chat_id}").json()
         d = []
         for k, v in data:
             d.append((v["username"], v["time"]))
