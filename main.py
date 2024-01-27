@@ -2,6 +2,7 @@ import sqlite3
 import telebot
 import datetime
 import os
+import requests
 
 TG_TOKEN = os.environ['TG_TOKEN']
 
@@ -9,6 +10,14 @@ bot = telebot.TeleBot(TG_TOKEN, parse_mode=None)
 
 conn = sqlite3.connect("/persistent/message_stat.db", check_same_thread=False,
                        detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
+
+
+def format_seconds_to_hhmmss(seconds):
+    hours = seconds // (60*60)
+    seconds %= (60*60)
+    minutes = seconds // 60
+    seconds %= 60
+    return "%02i:%02i:%02i" % (hours, minutes, seconds)
 
 
 @bot.message_handler(func=lambda m: True)
@@ -36,6 +45,40 @@ def echo_all(message):
             result += f"{i + 1}. {k[0]} - {k[1]}\n"
         bot.send_message(chat_id, result)
         return
+    
+    if text.lower() == "кто больше всех жмет по клаве" or text.lower() == "кто больше всех жмет по клаве?":
+        start_week = (first_day - datetime.timedelta(days=7)).strftime("%d.%m.%Y")
+        end_week = (first_day - datetime.timedelta(days=1)).strftime("%d.%m.%Y")
+        result = f"Лучшие мастера клавишного джаза за неделю {start_week} - {end_week}\n"
+        data = requests.get(f"http://localhost:25424/weekly_stats/{chat_id}").json()
+        d = []
+        for k, v in data:
+            d.append((v["username"], v["time"]))
+        d = sorted(d, key=lambda x: x[1], reverse=True)
+        if len(d) > 0:
+            for i, k in enumerate(d[:10]):
+                time = format_seconds_to_hhmmss(k.time)
+                result += f"{i + 1}. {k.username} - {time}\n"
+            bot.send_message(chat_id, result)
+            return
+        
+    
+    if text.lower() == "кто больше всех нажмякал по клаве" or text.lower() == "кто больше всех нажмякал по клаве?":
+        start_week = (first_day - datetime.timedelta(days=7)).strftime("%d.%m.%Y")
+        end_week = (first_day - datetime.timedelta(days=1)).strftime("%d.%m.%Y")
+        result = f"Клавишные легенды вечности\n"
+        data = requests.get(f"http://localhost:25424/global_stats/{chat_id}").json()
+        d = []
+        for k, v in data:
+            d.append((v["username"], v["time"]))
+        d = sorted(d, key=lambda x: x[1], reverse=True)
+        if len(d) > 0:
+            for i, k in enumerate(d[:10]):
+                time = format_seconds_to_hhmmss(k.time)
+                result += f"{i + 1}. {k.username} - {time}\n"
+            bot.send_message(chat_id, result)
+            return
+
 
     cur.execute(f"CREATE TABLE IF NOT EXISTS timings_{table_name} (creation_date timestamp);")
     cur.execute(

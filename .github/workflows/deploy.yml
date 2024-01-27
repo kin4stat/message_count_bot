@@ -34,5 +34,7 @@ jobs:
         username: ${{ secrets.SERVER_USERNAME }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
+          docker stop message_count
+          docker rm message_count
           docker pull kin4stat/message_count_bot:latest
           docker run --restart=always --name message_count -e "TG_TOKEN=${{ secrets.TG_TOKEN }}" -v message_count_volume:/persistent -d kin4stat/message_count_bot:latest
