@@ -52,13 +52,13 @@ def echo_all(message):
         result = f"Лучшие мастера клавишного джаза за неделю {start_week} - {end_week}\n"
         data = requests.get(f"http://localhost:25424/weekly_stats/{chat_id}").json()
         d = []
-        for k, v in data:
+        for k, v in data.items():
             d.append((v["username"], v["time"]))
         d = sorted(d, key=lambda x: x[1], reverse=True)
         if len(d) > 0:
             for i, k in enumerate(d[:10]):
-                time = format_seconds_to_hhmmss(k.time)
-                result += f"{i + 1}. {k.username} - {time}\n"
+                time = format_seconds_to_hhmmss(k[1])
+                result += f"{i + 1}. {k[0]} - {time}\n"
             bot.send_message(chat_id, result)
             return
         
@@ -69,13 +69,13 @@ def echo_all(message):
         result = f"Клавишные легенды вечности\n"
         data = requests.get(f"http://typing_count:25424/global_stats/{chat_id}").json()
         d = []
-        for k, v in data:
+        for k, v in data.items():
             d.append((v["username"], v["time"]))
         d = sorted(d, key=lambda x: x[1], reverse=True)
         if len(d) > 0:
             for i, k in enumerate(d[:10]):
-                time = format_seconds_to_hhmmss(k.time)
-                result += f"{i + 1}. {k.username} - {time}\n"
+                time = format_seconds_to_hhmmss(k[1])
+                result += f"{i + 1}. {k[0]} - {time}\n"
             bot.send_message(chat_id, result)
             return
 
